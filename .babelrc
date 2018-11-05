@@ -1,0 +1,4 @@
+{
+	"plugins": [ "@babel/transform-modules-commonjs" ],
+	"presets": [ "@babel/react" ]
+}

@@ -1,0 +1,7 @@
+{
+	"listen": {
+		"port": 3000
+	},
+	"database": "http://localhost:5984",
+	"appUrl": "http://example.com/tcf-stats"
+}

@@ -1,0 +1,14 @@
+[Unit]
+Description=The Crime Factory skills tracker
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Environment="NODE_ENV=production"
+Type=notify
+ExecStart=/usr/bin/env tcf-stats /etc/tcf-stats/config.json
+DynamicUser=yes
+Restart=always
+RestartSec=3
+
