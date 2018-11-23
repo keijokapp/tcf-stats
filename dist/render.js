@@ -230,7 +230,7 @@ function SkillDiff(props) {
       }
     }, _react.default.createElement("b", null, user.normalizedRankDiff), " (", user.rankDiff, ")"), _react.default.createElement("td", {
       className: "number"
-    }, _react.default.createElement("b", null, user.valueDiff.toFixed(2))), _react.default.createElement("td", {
+    }, _react.default.createElement("b", null, user.valueDiff.toFixed(2))), props.metadata.skill !== 'kaklemine' && _react.default.createElement("td", {
       className: "number"
     }, _react.default.createElement("b", null, (0, _common.calculateFame)({
       [props.metadata.skill]: user.value
@@ -254,7 +254,7 @@ function SkillDiff(props) {
     className: "number"
   }, "Koha muutus"), _react.default.createElement("td", {
     className: "number"
-  }, "Leveli muutus"), _react.default.createElement("td", {
+  }, "Leveli muutus"), props.metadata.skill !== 'kaklemine' && _react.default.createElement("td", {
     className: "number"
   }, "Kuulsuse muutus"))), _react.default.createElement("tbody", null, _react.default.createElement("tr", null, rows)));
 }
