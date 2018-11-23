@@ -3,9 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.timeout = timeout;
 exports.getTable = getTable;
 exports.extractPeriod = extractPeriod;
-exports.createTables = createTables;
+exports.createTable = createTable;
 exports.logger = exports.db = exports.skillName = exports.skillId = exports.worldName = exports.worldId = void 0;
 
 var _nodeFetch = _interopRequireDefault(require("node-fetch"));
@@ -101,8 +102,18 @@ const logger = _winston.default.createLogger({
     level: 'debug'
   })]
 });
+/**
+ * Returns promise which resolves after given period
+ * @param period {number}
+ * @returns {Promise}
+ */
+
 
 exports.logger = logger;
+
+function timeout(period) {
+  return new Promise(resolve => setTimeout(resolve, period));
+}
 
 async function getTable(world, skill, date) {
   const docId = `snapshot/${world}-${skill}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -289,14 +300,14 @@ async function fetchTable(world, skill) {
 async function createTable(world, skill) {
   let users = await fetchTable(world, skill);
   let date;
-  console.log('Fetching table', {
+  logger.debug('Fetching table', {
     world,
     skill
   });
 
   confirm: while (true) {
     date = new Date();
-    console.log('Confirming', {
+    logger.debug('Confirming', {
       world,
       skill,
       date
@@ -318,31 +329,31 @@ async function createTable(world, skill) {
     break;
   }
 
-  console.log('Fetched table', {
+  logger.info('Fetched table', {
     world,
     skill,
     date,
     size: Object.keys(users).length
   });
-  const docId = `snapshot/${world}-${skill}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`; // await db.post({ _id: docId, world, skill, time, users });
-}
-/**
- * Fetch, confirm and save all TOP-s of all worlds
- */
+  const docId = `snapshot/${world}-${skill}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
-
-async function createTables() {
-  const promises = [];
-
-  for (const world in worldName) {
-    for (const skill in skillName) {
-      promises.push(createTable(world, Number(skill)).catch(e => console.error('Failed to fetch table', {
+  try {
+    await db.put({
+      _id: docId,
+      world,
+      skill,
+      time: date.getTime(),
+      users
+    });
+  } catch (e) {
+    if (e.name === 'conflict') {
+      logger.warn('Snapshot already exists', {
         world,
         skill,
-        e: e.message
-      })));
+        date
+      });
+    } else {
+      throw e;
     }
   }
-
-  await Promise.all(promises);
-} // createTables().catch(e => console.error(e));
+}

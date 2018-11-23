@@ -13,14 +13,18 @@ var _config = _interopRequireDefault(require("./config"));
 
 var _app = _interopRequireDefault(require("./app"));
 
+var _snapshot = _interopRequireDefault(require("./snapshot"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function notifySystemd() {
+function ready() {
   try {
     require('sd-notify').ready();
   } catch (e) {
     _common.logger.debug('Systemd notification are not available');
   }
+
+  (0, _snapshot.default)();
 }
 
 const servers = [];
@@ -103,7 +107,7 @@ if (_config.default.listen === 'systemd') {
 
     _common.logger.info('Listening', address);
 
-    notifySystemd();
+    ready();
   });
 } else if ('path' in _config.default.listen) {
   const server = createServer();
@@ -130,7 +134,7 @@ if (_config.default.listen === 'systemd') {
         path: _config.default.listen.path
       });
 
-      notifySystemd();
+      ready();
     } else {
       (0, _cleanup.default)();
     }
