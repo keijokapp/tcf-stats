@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.calculateFame = calculateFame;
 exports.timeout = timeout;
 exports.getTable = getTable;
 exports.extractPeriod = extractPeriod;
@@ -93,6 +94,52 @@ Object.assign(skillId, {
   sepp: 32,
   kaevur: 34
 });
+
+const fameFormula0 = v => v * v * 9;
+
+const fameFormula1 = v => (v - 9) * (v - 9) * 3;
+
+const fameFormula2 = v => (v - 9) * (v - 9) * 2;
+
+const fameFormula3 = v => v * v * 3;
+
+const fameFormula4 = v => (v - 5) * (v - 5) * 3;
+
+const fameFormulas = {
+  aiandus: fameFormula0,
+  joohimeister: fameFormula0,
+  jõud: fameFormula1,
+  kaitse: fameFormula1,
+  keemik: fameFormula0,
+  kiirus: fameFormula2,
+  kokandus: fameFormula3,
+  käsitöö: fameFormula0,
+  osavus: fameFormula1,
+  raviteadus: fameFormula0,
+  relvakäsitsus: fameFormula0,
+  varastamine: fameFormula3,
+  vastupidavus: fameFormula4,
+  sepistamine: fameFormula0,
+  kaevandamine: fameFormula0
+};
+/**
+ * Calculates fame by given skills
+ * @param skills {object}
+ * @returns {number}
+ */
+
+function calculateFame(skills) {
+  let fame = 0;
+
+  for (const skill in fameFormulas) {
+    if (Number.isFinite(skills[skill])) {
+      fame += fameFormulas[skill](skills[skill]);
+    }
+  }
+
+  return fame;
+}
+
 const db = new _pouchdb.default(_config.default.database);
 exports.db = db;
 

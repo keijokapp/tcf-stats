@@ -230,7 +230,13 @@ function SkillDiff(props) {
       }
     }, _react.default.createElement("b", null, user.normalizedRankDiff), " (", user.rankDiff, ")"), _react.default.createElement("td", {
       className: "number"
-    }, _react.default.createElement("b", null, user.valueDiff.toFixed(2)))));
+    }, _react.default.createElement("b", null, user.valueDiff.toFixed(2))), _react.default.createElement("td", {
+      className: "number"
+    }, _react.default.createElement("b", null, (0, _common.calculateFame)({
+      [props.metadata.skill]: user.value
+    }) - (0, _common.calculateFame)({
+      [props.metadata.skill]: user.value - user.valueDiff
+    })))));
   }
 
   return _react.default.createElement("table", null, _react.default.createElement("thead", null, _react.default.createElement("tr", {
@@ -248,7 +254,9 @@ function SkillDiff(props) {
     className: "number"
   }, "Koha muutus"), _react.default.createElement("td", {
     className: "number"
-  }, "Leveli muutus"))), _react.default.createElement("tbody", null, _react.default.createElement("tr", null, rows)));
+  }, "Leveli muutus"), _react.default.createElement("td", {
+    className: "number"
+  }, "Kuulsuse muutus"))), _react.default.createElement("tbody", null, _react.default.createElement("tr", null, rows)));
 }
 
 function Index(props) {
