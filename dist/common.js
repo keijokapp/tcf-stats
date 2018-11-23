@@ -14,8 +14,6 @@ var _winston = _interopRequireDefault(require("winston"));
 
 var _pouchdb = _interopRequireDefault(require("pouchdb"));
 
-var _pouchdbSeedDesign = _interopRequireDefault(require("pouchdb-seed-design"));
-
 var _config = _interopRequireDefault(require("./config"));
 
 var _cleanup = _interopRequireDefault(require("./cleanup"));
@@ -96,30 +94,6 @@ Object.assign(skillId, {
 });
 const db = new _pouchdb.default(_config.default.database);
 exports.db = db;
-(0, _pouchdbSeedDesign.default)(db, {
-  daily: {
-    views: {
-      daily: {
-        map: function (doc) {
-          const date = new Date(doc.time);
-          date.setHours(0, 0, 0, 0);
-          emit([doc.world, Number(doc.skill), date.getTime()]);
-        }
-      }
-    }
-  }
-}).then(updated => {
-  if (updated) {
-    logger.info('Design documents updated');
-  } else {
-    logger.debug('Design documents didn\'t need updates');
-  }
-}, e => {
-  logger.error('Failed to seed database with design documents', {
-    e: e.message
-  });
-  (0, _cleanup.default)(1);
-});
 
 const logger = _winston.default.createLogger({
   format: _winston.default.format.simple(),
@@ -131,11 +105,17 @@ const logger = _winston.default.createLogger({
 exports.logger = logger;
 
 async function getTable(world, skill, date) {
-  const result = await db.query('daily', {
-    key: [world, skill, date.getTime()],
-    include_docs: true
-  });
-  return result.rows.length > 0 ? result.rows[0].doc : null;
+  const docId = `snapshot/${world}-${skill}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+
+  try {
+    return await db.get(docId);
+  } catch (e) {
+    if (e.name === 'not_found') {
+      return null;
+    } else {
+      throw e;
+    }
+  }
 }
 /**
  * Extract period from the URL token using some regex magic
@@ -308,18 +288,18 @@ async function fetchTable(world, skill) {
 
 async function createTable(world, skill) {
   let users = await fetchTable(world, skill);
-  let time;
+  let date;
   console.log('Fetching table', {
     world,
     skill
   });
 
   confirm: while (true) {
-    time = Date.now();
+    date = new Date();
     console.log('Confirming', {
       world,
       skill,
-      time
+      date
     });
     const confirmationTable = await fetchTable(world, skill);
 
@@ -341,9 +321,10 @@ async function createTable(world, skill) {
   console.log('Fetched table', {
     world,
     skill,
-    time,
+    date,
     size: Object.keys(users).length
-  }); // await db.post({ world, skill, time, users });
+  });
+  const docId = `snapshot/${world}-${skill}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`; // await db.post({ _id: docId, world, skill, time, users });
 }
 /**
  * Fetch, confirm and save all TOP-s of all worlds
