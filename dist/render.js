@@ -290,7 +290,7 @@ function Index(props) {
     id: "wrap"
   }, _react.default.createElement("div", {
     id: "header"
-  }, _react.default.createElement("p", null, _common.worldName[world], " maailm"), _react.default.createElement("ul", {
+  }, _react.default.createElement("p", null, world ? `${_common.worldName[world]} maailm` : ''), _react.default.createElement("ul", {
     style: {
       top: '4px'
     }
