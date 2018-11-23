@@ -45,7 +45,7 @@ exports.worldName = worldName;
 const skillId = {
   'kuulsus': 0,
   'aiandus': 2,
-  'joohimeister': 3,
+  'joogimeister': 3,
   'jõud': 4,
   'kaitse': 5,
   'kaklemine': 6,
@@ -72,7 +72,7 @@ for (const i in skillId) {
 Object.assign(skillId, {
   'kuulsuse': 0,
   'aianduse': 2,
-  'joogimeistry': 3,
+  'joogimeistri': 3,
   'jõu': 4,
   'kaklemise': 6,
   'keemiku': 7,
@@ -107,7 +107,7 @@ const fameFormula4 = v => (v - 5) * (v - 5) * 3;
 
 const fameFormulas = {
   aiandus: fameFormula0,
-  joohimeister: fameFormula0,
+  joogimeister: fameFormula0,
   jõud: fameFormula1,
   kaitse: fameFormula1,
   keemik: fameFormula0,
