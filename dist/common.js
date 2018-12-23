@@ -5,7 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.calculateFame = calculateFame;
 exports.timeout = timeout;
-exports.getTable = getTable;
 exports.getStats = getStats;
 exports.extractPeriod = extractPeriod;
 exports.createTable = createTable;
@@ -160,19 +159,42 @@ exports.logger = logger;
 function timeout(period) {
   return new Promise(resolve => setTimeout(resolve, period));
 }
+/**
+ * Loads bulk of tables from database
+ * @param descriptors {object} world, skill & date triples
+ * @returns {array} array of table documents, null representing non-existent table
+ */
 
-async function getTable(world, skill, date) {
-  const docId = `snapshot/${world}-${skill}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
-  try {
-    return await db.get(docId);
-  } catch (e) {
-    if (e.name === 'not_found') {
-      return null;
+async function getTables(...descriptors) {
+  const keys = [];
+
+  for (const {
+    world,
+    skill,
+    date
+  } of descriptors) {
+    const docId = `snapshot/${world}-${skill}-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    keys.push(docId);
+  }
+
+  const docs = await db.allDocs({
+    keys,
+    include_docs: true
+  });
+  const tables = [];
+
+  for (const row of docs.rows) {
+    if (row.error === 'not_found') {
+      tables.push(null);
+    } else if ('error' in row) {
+      throw new Error(row.error);
     } else {
-      throw e;
+      tables.push(row.doc);
     }
   }
+
+  return tables;
 }
 /**
  * Extracts new users and changed users from given pair of tables
@@ -248,7 +270,15 @@ function processTables(startTable, endTable) {
 
 
 async function getStats(world, skill, period) {
-  const [startTable, endTable] = await Promise.all([getTable(world, skill, period.startTime), getTable(world, skill, period.endTime)]);
+  const [startTable, endTable] = await getTables({
+    world,
+    skill,
+    date: period.startTime
+  }, {
+    world,
+    skill,
+    date: period.endTime
+  });
   const ret = {
     startTime: startTable && new Date(startTable.time),
     endTime: endTable && new Date(endTable.time)
