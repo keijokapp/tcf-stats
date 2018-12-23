@@ -49,8 +49,8 @@ app.use((req, res) => {
   if ('world' in metadata) {
     const world = _common.worldId[metadata.world];
     const skill = _common.skillId[metadata.skill];
-    Promise.all([(0, _common.getTable)(world, skill, period.startTime), (0, _common.getTable)(world, skill, period.endTime)]).then(([startTable, endTable]) => {
-      res.send((0, _render.default)(metadata, period, startTable, endTable));
+    (0, _common.getStats)(world, skill, period).then(stats => {
+      res.send((0, _render.default)(metadata, period, stats));
     }, e => {
       _common.logger.error('Error getting tables from database', {
         e: e.message

@@ -42,10 +42,6 @@ function prependZero(value) {
   return ('0' + value).slice(-2);
 }
 
-function comparator(v1, v2) {
-  return v2.valueDiff - v1.valueDiff || v1.rank - v2.rank;
-}
-
 function Home(props) {
   return _react.default.createElement("div", {
     className: "container"
@@ -64,20 +60,20 @@ function Home(props) {
 }
 
 function MetaData(props) {
-  const startTime = props.startTable ? new Date(props.startTable.time) : props.period.startTime;
-  const endTime = props.endTable ? new Date(props.endTable.time) : props.period.endTime;
+  const startTime = props.stats.startTime !== null ? new Date(props.stats.startTime) : props.period.startTime;
+  const endTime = props.stats.endTime !== null ? new Date(props.stats.endTime) : props.period.endTime;
   return _react.default.createElement("div", {
     id: "andmed",
     className: "container"
   }, _react.default.createElement("h2", null, "Info"), _react.default.createElement("ul", null, _react.default.createElement("li", null, _react.default.createElement("strong", null, "Algus:"), " ", _react.default.createElement("span", {
     style: {
-      color: props.startTable ? '' : 'red'
+      color: props.stats.startTime === null ? 'red' : ''
     }
   }, `${startTime.getDate()}.${prependZero(startTime.getMonth() + 1)}.${startTime.getFullYear()} ${prependZero(startTime.getHours())}:${prependZero(startTime.getMinutes())}`)), _react.default.createElement("li", null, _react.default.createElement("strong", null, "L\xF5pp:"), " ", _react.default.createElement("span", {
     style: {
-      color: props.endTable ? '' : 'red'
+      color: props.stats.endTime === null ? 'red' : ''
     }
-  }, `${endTime.getDate()}.${prependZero(endTime.getMonth() + 1)}.${endTime.getFullYear()} ${prependZero(endTime.getHours())}:${prependZero(endTime.getMinutes())}`)), _react.default.createElement("li", null, _react.default.createElement("strong", null, "Uusi kasutajaid:"), " ", _react.default.createElement("span", null, props.newUsersCount)), _react.default.createElement("li", null, _react.default.createElement("strong", null, "Arenenud kasutajaid:"), _react.default.createElement("span", null, props.changedUsersCount))));
+  }, `${endTime.getDate()}.${prependZero(endTime.getMonth() + 1)}.${endTime.getFullYear()} ${prependZero(endTime.getHours())}:${prependZero(endTime.getMinutes())}`)), props.stats.newUsers && _react.default.createElement("li", null, _react.default.createElement("strong", null, "Uusi kasutajaid:"), " ", _react.default.createElement("span", null, props.stats.newUsers.length)), props.stats.changedUsers && _react.default.createElement("li", null, _react.default.createElement("strong", null, "Arenenud kasutajaid:"), _react.default.createElement("span", null, props.stats.changedUsers.length))));
 }
 
 function SkillMenu(props) {
@@ -106,14 +102,14 @@ function SkillMenu(props) {
 
 function NewUsers(props) {
   const world = _common.worldId[props.metadata.world];
-  const numberOfColumns = props.users.length >= 8 ? 2 : 1;
-  const numberOfRows = Math.ceil(props.users.length / numberOfColumns);
+  const numberOfColumns = props.newUsers.length >= 8 ? 2 : 1;
+  const numberOfRows = Math.ceil(props.newUsers.length / numberOfColumns);
 
   function column(columnIndex) {
     const rows = [];
 
     for (let i = columnIndex * numberOfRows; i < columnIndex * numberOfRows + numberOfRows; i++) {
-      const user = props.users[i];
+      const user = props.users[props.newUsers[i]];
 
       if (user) {
         rows.push(_react.default.createElement("tr", {
@@ -158,8 +154,8 @@ function FameDiff(props) {
   const world = _common.worldId[props.metadata.world];
   const rows = [];
 
-  for (let i = 0; i < props.users.length; i++) {
-    const user = props.users[i];
+  for (let i = 0; i < props.changedUsers.length; i++) {
+    const user = props.users[props.changedUsers[i]];
     rows.push(_react.default.createElement("tr", {
       key: i
     }, _react.default.createElement("td", {
@@ -210,8 +206,8 @@ function SkillDiff(props) {
   const world = _common.worldId[props.metadata.world];
   const rows = [];
 
-  for (let i = 0; i < props.users.length; i++) {
-    const user = props.users[i];
+  for (let i = 0; i < props.changedUsers.length; i++) {
+    const user = props.users[props.changedUsers[i]];
     rows.push(_react.default.createElement("tr", {
       key: i
     }, _react.default.createElement("td", {
@@ -357,9 +353,9 @@ function Index(props) {
   }, "\xA0"), Array.isArray(props.children) ? props.children[0] : props.children), Array.isArray(props.children) ? props.children[1] : undefined));
 }
 
-function _default(metadata, period, startTable, endTable) {
+function _default(metadata, period, stats) {
   if ('world' in metadata) {
-    if (!startTable || !endTable) {
+    if (stats.startTime === null || stats.endTable === null) {
       return (0, _server.renderToString)(_react.default.createElement(Index, {
         metadata: metadata
       }, _react.default.createElement("div", null, _react.default.createElement("div", {
@@ -375,71 +371,27 @@ function _default(metadata, period, startTable, endTable) {
       }, "That's it"))), _react.default.createElement(MetaData, {
         metadata: metadata,
         period: period,
-        startTable: startTable,
-        endTable: endTable
+        stats: stats
       }), _react.default.createElement(SkillMenu, {
         metadata: metadata
       }))));
     }
 
     const skill = _common.skillId[metadata.skill];
-    const newUsers = [],
-          lostRanks = [];
-    const changedUsers = [];
-    let newRanksShift = 0,
-        lostRanksShift = 0;
+    const {
+      users,
+      changedUsers,
+      newUsers
+    } = stats;
 
-    for (const i in endTable.users) {
-      if (!(i in startTable.users)) {
-        newUsers.push({
-          user: i,
-          rank: endTable.users[i].rank,
-          value: endTable.users[i].value
-        });
-      } else {
-        const valueDiff = endTable.users[i].value - startTable.users[i].value;
-
-        if (valueDiff) {
-          const user = {
-            user: i,
-            rank: endTable.users[i].rank,
-            value: endTable.users[i].value,
-            rankDiff: startTable.users[i].rank - endTable.users[i].rank,
-            valueDiff
-          };
-          changedUsers.push(user);
-        }
-      }
-    }
-
-    for (const i in startTable.users) {
-      if (!(i in endTable.users)) {
-        lostRanks.push(startTable.users[i].rank);
-      }
-    }
-
-    newUsers.sort((v1, v2) => v1.rank - v2.rank);
-    changedUsers.sort((v1, v2) => v1.rank - v2.rank);
-    lostRanks.sort((v1, v2) => v1 - v2);
-
-    for (const user of changedUsers) {
-      while (newRanksShift < newUsers.length && newUsers[newRanksShift].rank < user.rank) {
-        newRanksShift++;
-      }
-
-      while (lostRanksShift < lostRanks.length && lostRanks[lostRanksShift] < user.rank) {
-        lostRanksShift++;
-      }
-
-      user.normalizedRankDiff = user.rankDiff + newRanksShift - lostRanksShift;
-    }
+    const comparator = (v1, v2) => users[v2].valueDiff - users[v1].valueDiff || users[v1].rank - users[v2].rank;
 
     if (skill === 0) {
       let millionIndex, halfMillionIndex;
 
-      for (millionIndex = 0; millionIndex < changedUsers.length && changedUsers[millionIndex].value >= 1000000; millionIndex++);
+      for (millionIndex = 0; millionIndex < changedUsers.length && users[changedUsers[millionIndex]].value >= 1000000; millionIndex++);
 
-      for (halfMillionIndex = millionIndex; halfMillionIndex < changedUsers.length && changedUsers[halfMillionIndex].value >= 500000; halfMillionIndex++);
+      for (halfMillionIndex = millionIndex; halfMillionIndex < changedUsers.length && users[changedUsers[halfMillionIndex]].value >= 500000; halfMillionIndex++);
 
       const group3 = changedUsers.slice(0, millionIndex);
       const group2 = changedUsers.slice(millionIndex, halfMillionIndex);
@@ -455,14 +407,12 @@ function _default(metadata, period, startTable, endTable) {
         className: "container"
       }, _react.default.createElement("h2", null, "Uued kasutajad"), _react.default.createElement(NewUsers, {
         metadata: metadata,
-        users: newUsers
+        users: users,
+        newUsers: newUsers
       }))), _react.default.createElement(MetaData, {
         metadata: metadata,
         period: period,
-        startTable: startTable,
-        endTable: endTable,
-        newUsersCount: newUsers.length,
-        changedUsersCount: changedUsers.length
+        stats: stats
       }), _react.default.createElement(SkillMenu, {
         metadata: metadata
       })), _react.default.createElement("div", {
@@ -475,15 +425,18 @@ function _default(metadata, period, startTable, endTable) {
       }, _react.default.createElement(FameDiff, {
         metadata: metadata,
         caption: "Alla 500 000",
-        users: group1
+        users: users,
+        changedUsers: group1
       }), _react.default.createElement(FameDiff, {
         metadata: metadata,
         caption: "500 000 - 999 999",
-        users: group2
+        users: users,
+        changedUsers: group2
       }), _react.default.createElement(FameDiff, {
         metadata: metadata,
         caption: "1 000 000 v\xF5i rohkem",
-        users: group3
+        users: users,
+        changedUsers: group3
       }))));
     } else {
       changedUsers.sort(comparator);
@@ -495,14 +448,12 @@ function _default(metadata, period, startTable, endTable) {
         className: "container"
       }, _react.default.createElement("h2", null, _common.skillName[skill].charAt(0).toUpperCase() + _common.skillName[skill].slice(1)), _react.default.createElement(SkillDiff, {
         metadata: metadata,
-        users: changedUsers
+        users: users,
+        changedUsers: changedUsers
       }))), _react.default.createElement(MetaData, {
         metadata: metadata,
         period: period,
-        startTable: startTable,
-        endTable: endTable,
-        newUsersCount: newUsers.length,
-        changedUsersCount: changedUsers.length
+        stats: stats
       }), _react.default.createElement(SkillMenu, {
         metadata: metadata
       }))));

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.calculateFame = calculateFame;
 exports.timeout = timeout;
 exports.getTable = getTable;
+exports.getStats = getStats;
 exports.extractPeriod = extractPeriod;
 exports.createTable = createTable;
 exports.logger = exports.db = exports.skillName = exports.skillId = exports.worldName = exports.worldId = void 0;
@@ -172,6 +173,92 @@ async function getTable(world, skill, date) {
       throw e;
     }
   }
+}
+/**
+ * Extracts new users and changed users from given pair of tables
+ * @param startTable {object} start table
+ * @param endTable {object} end table
+ * @returns {object} extracted information
+ */
+
+
+function processTables(startTable, endTable) {
+  const users = {};
+  const newUsers = [],
+        lostRanks = [];
+  const changedUsers = [];
+  let newRanksShift = 0,
+      lostRanksShift = 0;
+
+  for (const i in endTable.users) {
+    users[i] = {
+      user: i,
+      rank: endTable.users[i].rank,
+      value: endTable.users[i].value
+    };
+
+    if (!(i in startTable.users)) {
+      newUsers.push(i);
+    } else {
+      const valueDiff = endTable.users[i].value - startTable.users[i].value;
+
+      if (valueDiff) {
+        users[i].rankDiff = startTable.users[i].rank - endTable.users[i].rank;
+        users[i].valueDiff = valueDiff;
+        changedUsers.push(i);
+      }
+    }
+  }
+
+  for (const i in startTable.users) {
+    if (!(i in endTable.users)) {
+      lostRanks.push(startTable.users[i].rank);
+    }
+  }
+
+  newUsers.sort((v1, v2) => users[v1].rank - users[v2].rank);
+  changedUsers.sort((v1, v2) => users[v1].rank - users[v2].rank);
+  lostRanks.sort((v1, v2) => v1 - v2);
+
+  for (const user of changedUsers) {
+    while (newRanksShift < newUsers.length && users[newUsers[newRanksShift]].rank < users[user].rank) {
+      newRanksShift++;
+    }
+
+    while (lostRanksShift < lostRanks.length && lostRanks[lostRanksShift] < users[user].rank) {
+      lostRanksShift++;
+    }
+
+    users[user].normalizedRankDiff = users[user].rankDiff + newRanksShift - lostRanksShift;
+  }
+
+  return {
+    users,
+    newUsers,
+    changedUsers
+  };
+}
+/**
+ * Loads and processes tables for given world, skill & period
+ * @param world {string} world name
+ * @param skill {string} skill name
+ * @param period {object} startTime and endTime as Date instances
+ * @return {object} startTime & endTime of loaded tables and newUsers & changedUsers if both tables exist
+ */
+
+
+async function getStats(world, skill, period) {
+  const [startTable, endTable] = await Promise.all([getTable(world, skill, period.startTime), getTable(world, skill, period.endTime)]);
+  const ret = {
+    startTime: startTable && new Date(startTable.time),
+    endTime: endTable && new Date(endTable.time)
+  };
+
+  if (startTable !== null && endTable !== null) {
+    Object.assign(ret, processTables(startTable, endTable));
+  }
+
+  return ret;
 }
 /**
  * Extract period from the URL token using some regex magic
