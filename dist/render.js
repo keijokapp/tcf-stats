@@ -442,8 +442,8 @@ function _default(metadata, period, startTable, endTable) {
       for (halfMillionIndex = millionIndex; halfMillionIndex < changedUsers.length && changedUsers[halfMillionIndex].value >= 500000; halfMillionIndex++);
 
       const group3 = changedUsers.slice(0, millionIndex);
-      const group2 = changedUsers.slice(millionIndex + 1, halfMillionIndex);
-      const group1 = changedUsers.slice(halfMillionIndex + 1);
+      const group2 = changedUsers.slice(millionIndex, halfMillionIndex);
+      const group1 = changedUsers.slice(halfMillionIndex);
       group1.sort(comparator);
       group2.sort(comparator);
       group3.sort(comparator);
