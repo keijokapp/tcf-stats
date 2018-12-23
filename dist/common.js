@@ -18,8 +18,6 @@ var _pouchdb = _interopRequireDefault(require("pouchdb"));
 
 var _config = _interopRequireDefault(require("./config"));
 
-var _cleanup = _interopRequireDefault(require("./cleanup"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const worldId = {
@@ -192,7 +190,7 @@ function extractPeriod(token) {
   } else if (m = new RegExp(`^(${REGEXP_DATE})t$`).exec(token)) {
     startTime = new Date(m[1].split('.').reverse().join('-'));
     endTime = new Date();
-  } else if (m = new RegExp(`^(${REGEXP_DATE})([dpwnmkt])?$/`).exec(token)) {
+  } else if (m = new RegExp(`^(${REGEXP_DATE})([dpwnmkt])?$`).exec(token)) {
     endTime = new Date(m[1].split('.').reverse().join('-'));
     startTime = new Date(endTime.getTime());
 
@@ -308,7 +306,7 @@ async function fetchTablePage(world, skill, page) {
 /**
  * Fetch all pages from TOP
  * @param world {string} codename of the world
- * @param skill {integer} numberic skill id
+ * @param skill {integer} numeric skill id
  * @returns {object} user => { rank, value } map
  */
 
@@ -340,7 +338,7 @@ async function fetchTable(world, skill) {
 /**
  * Fetch, confirm and save TOP
  * @param world {string} codename of the world
- * @param skill {integer} numberic skill id
+ * @param skill {integer} numeric skill id
  */
 
 
