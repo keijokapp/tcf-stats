@@ -261,6 +261,34 @@ function processTables(startTable, endTable) {
   };
 }
 /**
+ * Cache of processed stats tables
+ * keyed by `world-skill-startTime-endTime` strings
+ */
+
+
+let statsCache = {}; // very naive cache clearing implementation
+// empties cache approximately every 1 hour
+
+setInterval(() => {
+  logger.info('Clearing cache', {
+    cacheSize: Object.keys(statsCache).length
+  });
+  statsCache = {};
+}, 60 * 3600 * 1000);
+/**
+ * Creates cache key for given arguments
+ * @param world {string} world name
+ * @param skill {string} skill name
+ * @param period {object} startTime and endTime as Date instances
+ * @returns {string}
+ */
+
+function getCacheKey(world, skill, period) {
+  const startTimeString = `${period.startTime.getFullYear()}-${period.startTime.getMonth() + 1}-${period.startTime.getDate()}`;
+  const endTimeString = `${period.endTime.getFullYear()}-${period.endTime.getMonth() + 1}-${period.endTime.getDate()}`;
+  return `${world}-${skill}-${startTimeString}-${endTimeString}`;
+}
+/**
  * Loads and processes tables for given world, skill & period
  * @param world {string} world name
  * @param skill {string} skill name
@@ -270,6 +298,24 @@ function processTables(startTable, endTable) {
 
 
 async function getStats(world, skill, period) {
+  const cacheKey = getCacheKey(world, skill, period);
+
+  if (cacheKey in statsCache) {
+    logger.debug('Cache hit', {
+      world,
+      skill,
+      startTime: period.startTime,
+      endTime: period.endTime
+    });
+    return statsCache[cacheKey];
+  }
+
+  logger.debug('Cache miss', {
+    world,
+    skill,
+    startTime: period.startTime,
+    endTime: period.endTime
+  });
   const [startTable, endTable] = await getTables({
     world,
     skill,
@@ -279,6 +325,11 @@ async function getStats(world, skill, period) {
     skill,
     date: period.endTime
   });
+
+  if (cacheKey in statsCache) {
+    return statsCache[cacheKey];
+  }
+
   const ret = {
     startTime: startTable && new Date(startTable.time),
     endTime: endTable && new Date(endTable.time)
@@ -286,6 +337,7 @@ async function getStats(world, skill, period) {
 
   if (startTable !== null && endTable !== null) {
     Object.assign(ret, processTables(startTable, endTable));
+    statsCache[cacheKey] = ret;
   }
 
   return ret;
