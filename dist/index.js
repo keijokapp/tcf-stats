@@ -98,7 +98,7 @@ if (_config.default.listen === 'systemd') {
       fds
     });
 
-    notifySystemdy();
+    ready();
   }
 } else if ('port' in _config.default.listen) {
   const server = createServer();
