@@ -23,7 +23,7 @@ app.set('trust proxy', true);
 app.use(_expressWinston.default.logger({
   winstonInstance: _common.logger
 }));
-app.use((req, res) => {
+app.use((req, res, next) => {
   const metadata = {};
   let period;
   const components = req.url.split(/\//g).map(c => decodeURIComponent(c));
@@ -51,13 +51,7 @@ app.use((req, res) => {
     const skill = _common.skillId[metadata.skill];
     (0, _common.getStats)(world, skill, period).then(stats => {
       res.send((0, _render.default)(metadata, period, stats));
-    }, e => {
-      _common.logger.error('Error getting tables from database', {
-        e: e.message
-      });
-
-      res.status(500).send('Internal Server Error');
-    });
+    }, next);
   } else {
     res.send((0, _render.default)(metadata));
   }
@@ -76,10 +70,7 @@ app.use((e, req, res, next) => {
       stack: e.stack
     });
 
-    res.status(500).send({
-      error: 'Internal Server Error',
-      message: 'Something has gone wrong'
-    });
+    res.status(500).send('Internal Server Error');
   } else {
     _common.logger.error('Unknown application error ', {
       e
