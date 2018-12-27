@@ -355,7 +355,7 @@ function Index(props) {
 
 function _default(metadata, period, stats) {
   if ('world' in metadata) {
-    if (stats.startTime === null || stats.endTable === null) {
+    if (stats.startTime === null || stats.endTime === null) {
       return (0, _server.renderToString)(_react.default.createElement(Index, {
         metadata: metadata
       }, _react.default.createElement("div", null, _react.default.createElement("div", {
