@@ -226,7 +226,7 @@ function SkillDiff(props) {
       }
     }, _react.default.createElement("b", null, user.normalizedRankDiff), " (", user.rankDiff, ")"), _react.default.createElement("td", {
       className: "number"
-    }, _react.default.createElement("b", null, props.user.valueDiff.toFixed(props.metadata.skill === 'kaklemine' ? 2 : 0))), props.metadata.skill !== 'kaklemine' && _react.default.createElement("td", {
+    }, _react.default.createElement("b", null, user.valueDiff.toFixed(props.metadata.skill === 'kaklemine' ? 2 : 0))), props.metadata.skill !== 'kaklemine' && _react.default.createElement("td", {
       className: "number"
     }, _react.default.createElement("b", null, (0, _common.calculateFame)({
       [props.metadata.skill]: user.value
