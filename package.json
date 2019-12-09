@@ -9,22 +9,22 @@
     "build": "babel lib --out-dir dist"
   },
   "dependencies": {
-    "express": "^4.16.4",
-    "express-winston": "^3.0.1",
-    "jsonschema": "^1.2.4",
-    "node-fetch": "^2.2.1",
-    "pouchdb": "^7.0.0",
-    "react": "^16.6.0",
-    "react-dom": "^16.6.0",
-    "winston": "^3.1.0"
+    "express": "^4.17.1",
+    "express-winston": "^4.0.1",
+    "jsonschema": "^1.2.5",
+    "node-fetch": "^2.6.0",
+    "pouchdb": "^7.1.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "winston": "^3.2.1"
   },
   "optionalDependencies": {
-    "sd-notify": "^2.3.1"
+    "sd-notify": "^2.7.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.1.2",
-    "@babel/core": "^7.1.2",
-    "@babel/plugin-transform-modules-commonjs": "^7.1.0",
-    "@babel/preset-react": "^7.0.0"
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.7.5",
+    "@babel/preset-react": "^7.7.4"
   }
 }
