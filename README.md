@@ -42,4 +42,4 @@ systemctl start tcf-stats
 
 # Licence
 
-Mainly MIT. However, UI theme is probably property of NetFly OÜ - the company running the game.
+ISC. However, UI theme is probably property of NetFly OÜ - the company running the game.

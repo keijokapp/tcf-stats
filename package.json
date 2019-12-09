@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "The Crime Factory skills tracker",
   "author": "Keijo Kapp <keijo.kapp@gmail.com>",
-  "license": "MIT",
+  "license": "ISC",
   "bin": "./dist/index.js",
   "scripts": {
     "build": "babel lib --out-dir dist"
