@@ -10,7 +10,7 @@ Quick start on Ubuntu 18.04:
 ```
 apt install nodejs npm build-essential libsystemd-dev couchdb
 
-npm install https://github.com/keijokapp/tcf-stats
+npm install https://github.com/keijokapp/tcf-stats/releases/download/0.1.0/tcf-stats-0.1.0.tgz
 
 tcf-stats /path/to/config.json
 ```

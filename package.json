@@ -5,8 +5,13 @@
   "author": "Keijo Kapp <keijo.kapp@gmail.com>",
   "license": "ISC",
   "bin": "./dist/index.js",
+  "files": [
+    "dist",
+    "config_sample.json",
+    "tcf-stats.service"
+  ],
   "scripts": {
-    "build": "babel lib --out-dir dist"
+    "build": "babel lib --out-dir dist && npm pack && rm -rf dist"
   },
   "dependencies": {
     "express": "^4.17.1",
